@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authService, User, GeneratedImage } from '@/lib/auth';
 import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
+import PhotoHero from '@/components/photo_hero';
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -125,6 +126,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
+      <PhotoHero onSearch={handleSearch} />
     </div>
   );
 }
