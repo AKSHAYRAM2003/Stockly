@@ -1,0 +1,88 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { authService } from '@/lib/auth';
+import { AuthPage } from '@/components/ui/auth';
+
+export default function SignInPage() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      router.push('/');
+    }
+  }, [router]);
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const { auth_url } = await authService.getGoogleAuthUrl();
+      window.location.href = auth_url;
+    } catch (error) {
+      console.error('Failed to get Google auth URL:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleToggleToSignup = () => {
+    router.push('/signup');
+  };
+
+  const handleBackToHome = () => {
+    router.push('/');
+  };
+
+  const testimonials = [
+    {
+      avatarSrc: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
+      name: "Alex Chen",
+      handle: "@alexchen",
+      text: "Stockly has revolutionized how I create visual content for my projects!"
+    },
+    {
+      avatarSrc: "https://images.unsplash.com/photo-1494790108755-2616b612b76c?w=40&h=40&fit=crop&crop=face",
+      name: "Sarah Rodriguez",
+      handle: "@sarahdesigns",
+      text: "The AI-generated images are incredibly detailed and professional."
+    },
+    {
+      avatarSrc: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
+      name: "Mike Thompson",
+      handle: "@mikethompson",
+      text: "Perfect for creating unique artwork and illustrations quickly."
+    }
+  ];
+
+  return (
+    <AuthPage
+      mode="signin"
+      title={
+        <div className="flex flex-col items-start">
+          <div className="flex items-center space-x-3 mb-4">
+            <img
+              src="/logo.png"
+              alt="Stockly Logo"
+              className="w-12 h-12 filter brightness-0 invert"
+            />
+            <span className="text-white font-bold text-2xl italic">Stockly</span>
+          </div>
+          <span className="font-light text-white tracking-tighter">Welcome Back</span>
+        </div>
+      }
+      description="Sign in to create stunning AI-generated images and unlock your creative potential"
+      heroImageSrc="https://images.unsplash.com/photo-1756992293716-b843700b5ab0?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      testimonials={testimonials}
+      onGoogleAuth={handleGoogleLogin}
+      onToggleMode={handleToggleToSignup}
+      onBackToHome={handleBackToHome}
+      onResetPassword={() => {
+        console.log('Reset password clicked');
+      }}
+      loading={loading}
+    />
+  );
+}
