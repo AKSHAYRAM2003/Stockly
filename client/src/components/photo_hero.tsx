@@ -53,6 +53,7 @@ export default function PhotoHero({ onSearch }: PhotoHeroProps) {
 
       {/* Hero Text */}
       <div className="text-left">
+        
         <h1 className="text-[9.6vw]  leading-[10vw] font-semibold md:text-[9.8vw] whitespace-nowrap mt-4 mb-2">
         no more boring Images
         </h1>
