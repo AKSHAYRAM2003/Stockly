@@ -38,13 +38,13 @@ export default function SignUpPage() {
 
   const testimonials = [
     {
-      avatarSrc: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face",
+      avatarSrc: "https://images.unsplash.com/photo-1583692331501-5339b76cbf1e?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       name: "Emma Wilson",
       handle: "@emmawilson",
       text: "Creating my first AI artwork was so easy with Stockly's intuitive interface!"
     },
     {
-      avatarSrc: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=40&h=40&fit=crop&crop=face",
+      avatarSrc: "https://images.unsplash.com/photo-1679673988162-018d0400240e?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       name: "David Park",
       handle: "@davidpark",
       text: "The quality of generated images exceeded my expectations completely."
@@ -55,6 +55,7 @@ export default function SignUpPage() {
       handle: "@lisagarcia",
       text: "Stockly transformed how I approach creative projects and presentations."
     }
+
   ];
 
   return (

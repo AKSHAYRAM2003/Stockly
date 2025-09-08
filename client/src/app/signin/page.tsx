@@ -38,19 +38,19 @@ export default function SignInPage() {
 
   const testimonials = [
     {
-      avatarSrc: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
+      avatarSrc: "https://images.unsplash.com/photo-1678483573236-d8eb3fb024e2?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       name: "Alex Chen",
       handle: "@alexchen",
       text: "Stockly has revolutionized how I create visual content for my projects!"
     },
     {
-      avatarSrc: "https://images.unsplash.com/photo-1494790108755-2616b612b76c?w=40&h=40&fit=crop&crop=face",
+      avatarSrc: "https://images.unsplash.com/photo-1605369572399-05d8d64a0f6e?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       name: "Sarah Rodriguez",
       handle: "@sarahdesigns",
       text: "The AI-generated images are incredibly detailed and professional."
     },
     {
-      avatarSrc: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
+      avatarSrc: "https://www.lummi.ai/api/render/image/8a9a5f1f-f2aa-47e7-b91f-1ae13f11c6e5?token=eyJhbGciOiJIUzI1NiJ9.eyJpZHMiOlsiOGE5YTVmMWYtZjJhYS00N2U3LWI5MWYtMWFlMTNmMTFjNmU1Il0sInJlc29sdXRpb24iOiJtZWRpdW0iLCJyZW5kZXJTcGVjcyI6eyJlZmZlY3RzIjp7InJlZnJhbWUiOnt9fX0sInNob3VsZEF1dG9Eb3dubG9hZCI6ZmFsc2UsImp0aSI6IjVheHRaTkhnQ2tkRWs0aENEdE04SSIsImlhdCI6MTc1NzM0MjExNiwiZXhwIjoxNzU3MzQyMTc2fQ.vZdv_-Ez8lNuPrR98aRYRGId_vnvpw6lw-NP5POlp6U",
       name: "Mike Thompson",
       handle: "@mikethompson",
       text: "Perfect for creating unique artwork and illustrations quickly."
@@ -86,3 +86,5 @@ export default function SignInPage() {
     />
   );
 }
+
+
