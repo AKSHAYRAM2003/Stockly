@@ -3,9 +3,8 @@ import React from "react";
 const Toolbar: React.FC = () => {
   return (
     <div
-      className="sticky top-16 z-40 transition-shadow  px-0 pt-0 pb-3 
-                 md:px-3 lg:px-5 flex justify-between items-center gap-8 shadow-md 
-                 -mx-3 lg:-mx-5 w-[calc(100%+24px)] lg:w-[calc(100%+40px)]"
+      className="sticky top-28 md:top-28 lg:top-20 z-50 bg-black border-b border-gray-800 transition-shadow px-4 pt-0 pb-3
+                 md:px-6 lg:px-8 flex justify-start items-center gap-8 shadow-lg w-full"
     >
       <div className="flex gap-2 w-full min-w-0">
         {/* Gradient Scroll Wrapper */}

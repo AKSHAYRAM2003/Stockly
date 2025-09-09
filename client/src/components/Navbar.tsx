@@ -118,7 +118,7 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
   const categories = ['Photos', 'Illustrations', '3D'];
 
   return (
-    <nav className="bg-black  border-gray-800 px-4 lg:px-8 py-4 font-inter">
+    <nav className="sticky top-0 z-50 bg-black border-gray-800 px-4 lg:px-8 py-4 font-inter mb-0">
       <div className="max-w-full mx-auto">
         {/* Desktop Layout (lg and above) */}
         <div className="hidden  lg:flex items-center justify-between">
@@ -156,91 +156,91 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
           </div>
 
           {/* Center - Search Bar (Larger) */}
-          <div className="flex-1 max-w-5xl mx-11">
+            <div className="flex-1 max-w-5xl mx-11">
             <form onSubmit={handleSearch} className="relative">
-              <div className="relative flex items-center  rounded-full border border-gray-700 focus-within:border-gray-600 focus-within:ring-2 focus-within:ring-gray-600/20 transition-all duration-300 h-14 shadow-lg">
-                {/* Toggle Switcher with perfect sliding animation */}
-                <div className="absolute left-2 z-20 bg-gradient-to-br from-neutral-700 to-neutral-800 rounded-full p-1 shadow-inner overflow-hidden ">
-                  <div className="relative flex ">
+              <div className="relative flex items-center  rounded-full border border-gray-700 focus-within:border-gray-600 focus-within:ring-2 focus-within:ring-gray-600/20 transition-all duration-300 h-12 shadow-lg">
+              {/* Toggle Switcher with perfect sliding animation */}
+              <div className="absolute left-1 z-20 bg-gradient-to-br from-neutral-700 to-neutral-800 rounded-full p-0.5 shadow-inner overflow-hidden ">
+                <div className="relative flex ">
 
-                    {/* Sliding background indicator - perfectly sized and positioned */}
-                    <div 
-                      className={`absolute top-0 w-10 h-10 bg-neutral-300 rounded-full shadow-lg transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-                        searchMode === 'search' ? 'left-0' : 'left-10'
-                      }`}
-                    />
-                    
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchMode('search');
-                        setSearchQuery('');
-                        focusSearchInput();
-                      }}
-                      className={`relative z-10 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-                        searchMode === 'search' 
-                          ? 'text-black scale-105' 
-                          : 'text-gray-400 hover:text-white scale-100'
-                      }`}
-                    >
-                      <Search className={`h-4 w-4 transition-all duration-300 ${
-                        searchMode === 'search' ? 'scale-110' : 'scale-100'
-                      }`} />
-                    </button>
-                    
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchMode('generate');
-                        setSearchQuery('');
-                        focusSearchInput();
-                      }}
-                      className={`relative z-10 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-                        searchMode === 'generate' 
-                          ? 'text-black  scale-105' 
-                          : 'text-gray-400 hover:text-white scale-100'
-                      }`}
-                    >
-                      <SparklesIcon className={`h-4 w-4 transition-all duration-300 ${
-                        searchMode === 'generate' ? 'fill-yellow-400 border-neutral-200 rotate-10 scale-110' : 'rotate-0 scale-100'
-                      }`} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Input with perfect padding and alignment */}
-                <input
-                  type="text"
-                  placeholder={getPlaceholder()}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent text-white placeholder-gray-400 pl-26 pr-32 py-5 text-base focus:outline-none rounded-full transition-all duration-300 leading-none"
+                {/* Sliding background indicator - perfectly sized and positioned */}
+                <div 
+                  className={`absolute top-0 w-8 h-8 bg-neutral-300 rounded-full shadow-lg transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+                  searchMode === 'search' ? 'left-0' : 'left-8'
+                  }`}
                 />
-
-                {/* Right Side Icons */}
-                <div className="absolute right-2 flex items-center space-x-3">
-                  {/* Command + K hint with animation */}
-                  {searchMode === 'search' && (
-                    <div className="flex items-center space-x-1.5 text-gray-500 text-xs bg-gradient-to-br from-neutral-700 to-neutral-800 px-3 py-2 rounded-full border border-neutral-500 animate-in fade-in slide-in-from-right-4 duration-300">
-                      <Command className="h-3.5 w-3.5" />
-                      <span className="font-medium">K</span>
-                    </div>
-                  )}
-
-                  {/* Send Button with animation - Always visible and rounded in generate mode */}
-                  {searchMode === 'generate' && (
-                    <button
-                      type="submit"
-                      disabled={!searchQuery.trim()}
-                      className="p-3 bg-white text-black rounded-full hover:bg-gray-100 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 animate-in fade-in slide-in-from-right-2 shadow-md"
-                    >
-                      <Send className="h-4 w-4" />
-                    </button>
-                  )}
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                  setSearchMode('search');
+                  setSearchQuery('');
+                  focusSearchInput();
+                  }}
+                  className={`relative z-10 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+                  searchMode === 'search' 
+                    ? 'text-black scale-105' 
+                    : 'text-gray-400 hover:text-white scale-100'
+                  }`}
+                >
+                  <Search className={`h-3 w-3 transition-all duration-300 ${
+                  searchMode === 'search' ? 'scale-110' : 'scale-100'
+                  }`} />
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                  setSearchMode('generate');
+                  setSearchQuery('');
+                  focusSearchInput();
+                  }}
+                  className={`relative z-10 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+                  searchMode === 'generate' 
+                    ? 'text-black  scale-105' 
+                    : 'text-gray-400 hover:text-white scale-100'
+                  }`}
+                >
+                  <SparklesIcon className={`h-3 w-3 transition-all duration-300 ${
+                  searchMode === 'generate' ? 'fill-yellow-700' : 'rotate-0 scale-100'
+                  }`} />
+                </button>
                 </div>
               </div>
+
+              {/* Input with perfect padding and alignment */}
+              <input
+                type="text"
+                placeholder={getPlaceholder()}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-white placeholder-gray-400 pl-20 pr-24 py-5 text-base focus:outline-none rounded-full transition-all duration-300 leading-none"
+              />
+
+              {/* Right Side Icons */}
+              <div className="absolute right-2 flex items-center space-x-3">
+                {/* Command + K hint with animation */}
+                {searchMode === 'search' && (
+                <div className="flex items-center space-x-1.5 text-gray-500 text-xs bg-gradient-to-br from-neutral-700 to-neutral-800 px-2 py-1 rounded-full border border-neutral-500 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <Command className="h-3 w-3" />
+                  <span className="font-medium">K</span>
+                </div>
+                )}
+
+                {/* Send Button with animation - Always visible and rounded in generate mode */}
+                {searchMode === 'generate' && (
+                <button
+                  type="submit"
+                  disabled={!searchQuery.trim()}
+                  className="p-2 bg-white text-black rounded-full hover:bg-gray-100 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 animate-in fade-in slide-in-from-right-2 shadow-md"
+                >
+                  <Send className="h-3 w-3" />
+                </button>
+                )}
+              </div>
+              </div>
             </form>
-          </div>
+            </div>
 
           {/* Right section - Auth */}
           <div className="flex items-center">
@@ -305,8 +305,9 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
             {/* Search Bar - Center */}
             <div className="flex-1 max-w-lg mx-8">
               <form onSubmit={handleSearch} className="relative">
-                <div className="relative flex items-center bg-gray-900 rounded-full border border-gray-700 focus-within:border-gray-600 focus-within:ring-2 focus-within:ring-gray-600/20 transition-all duration-300 h-12 shadow-md">
-                  <div className="absolute left-3 z-20 bg-gray-800 rounded-full p-1 shadow-inner overflow-hidden">
+                <div className="relative flex items-center rounded-full border border-gray-700 focus-within:border-gray-600 focus-within:ring-2 focus-within:ring-gray-600/20 transition-all duration-300 h-12 shadow-md">
+
+                  <div className="absolute left-1 z-20 bg-gray-800 rounded-full p-1 bg-gradient-to-br from-neutral-700 to-neutral-800 shadow-inner overflow-hidden">
                     <div className="relative flex">
                       {/* Sliding background indicator - perfectly sized and positioned */}
                       <div 
@@ -347,7 +348,7 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
                         }`}
                       >
                         <SparklesIcon className={`h-3.5 w-3.5 transition-all duration-300 ${
-                          searchMode === 'generate' ? 'fill-current rotate-12 scale-110' : 'rotate-0 scale-100'
+                          searchMode === 'generate' ? 'fill-yellow-400 rotate-12 scale-110' : 'rotate-0 scale-100'
                         }`} />
                       </button>
                     </div>
@@ -361,9 +362,9 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
                     className="w-full bg-transparent text-white placeholder-gray-400 pl-24 pr-20 py-3 text-sm focus:outline-none rounded-full leading-none"
                   />
 
-                  <div className="absolute right-3 flex items-center space-x-2">
+                  <div className="absolute right-2 flex items-center space-x-2 ">
                     {searchMode === 'search' && (
-                      <div className="flex items-center space-x-1 text-gray-500 text-xs bg-gray-800 px-2 py-1 rounded-full border border-gray-700 animate-in fade-in duration-300">
+                      <div className="flex items-center space-x-1 text-gray-500 text-xs bg-gradient-to-br from-neutral-700 to-neutral-800 px-3 py-2 rounded-full  border border-neutral-700 animate-in fade-in duration-300 ">
                         <Command className="h-2.5 w-2.5" />
                         <span className="font-medium">K</span>
                       </div>
@@ -466,8 +467,8 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
             {/* Search Bar - Flexible width */}
             <div className="flex-1 max-w-sm">
               <form onSubmit={handleSearch} className="relative">
-                <div className="relative flex items-center bg-gray-900 rounded-full border border-gray-700 focus-within:border-gray-600 focus-within:ring-1 focus-within:ring-gray-600/20 transition-all duration-300 h-11 shadow-sm">
-                  <div className="absolute left-2.5 z-20 bg-gray-800 rounded-full p-0.5 shadow-inner overflow-hidden">
+                <div className="relative flex items-center  rounded-full border border-gray-700 focus-within:border-gray-600 focus-within:ring-1 focus-within:ring-gray-600/20 transition-all duration-300 h-11 shadow-sm">
+                  <div className="absolute left-1 z-20 bg-gradient-to-br from-neutral-700 to-neutral-800 rounded-full p-0.5 shadow-inner overflow-hidden">
                     <div className="relative flex">
                       {/* Sliding background indicator - perfectly sized and positioned */}
                       <div 
@@ -508,7 +509,7 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
                         }`}
                       >
                         <SparklesIcon className={`h-3 w-3 transition-all duration-300 ${
-                          searchMode === 'generate' ? 'fill-current rotate-12 scale-110' : 'rotate-0 scale-100'
+                          searchMode === 'generate' ? 'fill-yellow-400 rotate-12 scale-110' : 'rotate-0 scale-100'
                         }`} />
                       </button>
                     </div>
