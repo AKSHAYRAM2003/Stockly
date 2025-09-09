@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authService, User, GeneratedImage } from '@/lib/auth';
 import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
-import PhotoHero from '@/components/photo_hero';
+import ThreeDHero from '@/components/threed_hero';
 import Toolbar from '@/components/Toolbar';
 import ImageGallery from '@/components/ImageGallery';
 
@@ -29,10 +29,10 @@ const placeholderImages = [
   'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=400&h=450&fit=crop',
 ];
 
-export default function Dashboard() {
+export default function ThreeDPage() {
   const [user, setUser] = useState<User | null>(null);
   const [prompt, setPrompt] = useState('');
-  const [category, setCategory] = useState('Photos');
+  const [category, setCategory] = useState('3D');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<GeneratedImage[]>([]);
@@ -76,30 +76,30 @@ export default function Dashboard() {
     setFeaturedImages([
       {
         id: '1',
-        original_prompt: 'Beautiful sunset over mountains',
-        enhanced_prompt: 'Stunning landscape with vibrant colors',
+        original_prompt: '3D abstract sculpture',
+        enhanced_prompt: 'Modern geometric 3D art piece',
         image_urls: ['https://picsum.photos/400/300?random=1'],
-        category: 'Photos',
+        category: '3D',
         created_at: new Date().toISOString(),
         user_id: 'demo',
         is_deleted: false
       },
       {
         id: '2',
-        original_prompt: 'Abstract geometric patterns',
-        enhanced_prompt: 'Modern art with clean lines',
+        original_prompt: 'Futuristic architecture',
+        enhanced_prompt: 'Sci-fi building design in 3D',
         image_urls: ['https://picsum.photos/400/300?random=2'],
-        category: 'Illustrations',
+        category: '3D',
         created_at: new Date().toISOString(),
         user_id: 'demo',
         is_deleted: false
       },
       {
         id: '3',
-        original_prompt: 'Tech startup icon',
-        enhanced_prompt: 'Minimalist app icon design',
+        original_prompt: 'Character model',
+        enhanced_prompt: 'Detailed 3D character design',
         image_urls: ['https://picsum.photos/400/300?random=3'],
-        category: 'Icons',
+        category: '3D',
         created_at: new Date().toISOString(),
         user_id: 'demo',
         is_deleted: false
@@ -156,7 +156,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar onCategoryChange={handleCategoryChange} onSearch={handleSearch} activeCategory={category} />
-      <PhotoHero onSearch={handleSearch} />
+      <ThreeDHero onSearch={handleSearch} />
       <Toolbar/>
 
       {/* Image Showcase Grid */}

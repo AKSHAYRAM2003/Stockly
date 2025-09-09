@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authService, User, GeneratedImage } from '@/lib/auth';
 import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
-import PhotoHero from '@/components/photo_hero';
+import InteriorHero from '@/components/interior_hero';
 import Toolbar from '@/components/Toolbar';
 import ImageGallery from '@/components/ImageGallery';
 
@@ -29,10 +29,10 @@ const placeholderImages = [
   'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=400&h=450&fit=crop',
 ];
 
-export default function Dashboard() {
+export default function InteriorPage() {
   const [user, setUser] = useState<User | null>(null);
   const [prompt, setPrompt] = useState('');
-  const [category, setCategory] = useState('Photos');
+  const [category, setCategory] = useState('Interior');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<GeneratedImage[]>([]);
@@ -76,30 +76,30 @@ export default function Dashboard() {
     setFeaturedImages([
       {
         id: '1',
-        original_prompt: 'Beautiful sunset over mountains',
-        enhanced_prompt: 'Stunning landscape with vibrant colors',
+        original_prompt: 'Beautiful interior design',
+        enhanced_prompt: 'Stunning modern living room',
         image_urls: ['https://picsum.photos/400/300?random=1'],
-        category: 'Photos',
+        category: 'Interior',
         created_at: new Date().toISOString(),
         user_id: 'demo',
         is_deleted: false
       },
       {
         id: '2',
-        original_prompt: 'Abstract geometric patterns',
-        enhanced_prompt: 'Modern art with clean lines',
+        original_prompt: 'Minimalist bedroom',
+        enhanced_prompt: 'Clean and modern bedroom design',
         image_urls: ['https://picsum.photos/400/300?random=2'],
-        category: 'Illustrations',
+        category: 'Interior',
         created_at: new Date().toISOString(),
         user_id: 'demo',
         is_deleted: false
       },
       {
         id: '3',
-        original_prompt: 'Tech startup icon',
-        enhanced_prompt: 'Minimalist app icon design',
+        original_prompt: 'Luxury kitchen',
+        enhanced_prompt: 'Gourmet kitchen with premium finishes',
         image_urls: ['https://picsum.photos/400/300?random=3'],
-        category: 'Icons',
+        category: 'Interior',
         created_at: new Date().toISOString(),
         user_id: 'demo',
         is_deleted: false
@@ -156,7 +156,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar onCategoryChange={handleCategoryChange} onSearch={handleSearch} activeCategory={category} />
-      <PhotoHero onSearch={handleSearch} />
+      <InteriorHero onSearch={handleSearch} />
       <Toolbar/>
 
       {/* Image Showcase Grid */}

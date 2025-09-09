@@ -8,12 +8,12 @@ import { Search, Send, Command, Menu, X, SparklesIcon } from 'lucide-react';
 interface NavbarProps {
   onCategoryChange?: (category: string) => void;
   onSearch?: (query: string) => void;
+  activeCategory?: string;
 }
 
-export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
+export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'Photos' }: NavbarProps) {
   const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('Photos');
   const [searchMode, setSearchMode] = useState<'search' | 'generate'>('search');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
@@ -31,6 +31,57 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
       };
       fetchUser();
     }
+  }, []);
+
+  // Listen for storage changes (for OAuth login)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'access_token') {
+        if (e.newValue) {
+          // Token was added - fetch user
+          const fetchUser = async () => {
+            try {
+              const userData = await authService.getCurrentUser();
+              setUser(userData);
+            } catch (error) {
+              console.error('Failed to fetch user:', error);
+            }
+          };
+          fetchUser();
+        } else {
+          // Token was removed - clear user
+          setUser(null);
+        }
+      }
+    };
+
+    const handleAuthLogin = () => {
+      // OAuth login completed - fetch user
+      const fetchUser = async () => {
+        try {
+          const userData = await authService.getCurrentUser();
+          setUser(userData);
+        } catch (error) {
+          console.error('Failed to fetch user:', error);
+        }
+      };
+      fetchUser();
+    };
+
+    const handleAuthLogout = () => {
+      // User logged out - clear user state
+      setUser(null);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('auth-login', handleAuthLogin);
+    window.addEventListener('auth-logout', handleAuthLogout);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-login', handleAuthLogin);
+      window.removeEventListener('auth-logout', handleAuthLogout);
+    };
   }, []);
 
   useEffect(() => {
@@ -61,9 +112,14 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
   }, []);
 
   const handleCategoryClick = (category: string) => {
-    setActiveCategory(category);
-    if (onCategoryChange) {
-      onCategoryChange(category);
+    onCategoryChange?.(category);
+    // Navigate to the appropriate page based on category
+    if (category === 'Photos') {
+      router.push('/');
+    } else if (category === 'Interior') {
+      router.push('/interior');
+    } else if (category === '3D') {
+      router.push('/3d');
     }
   };
 
@@ -85,6 +141,10 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
   const handleLogout = () => {
     authService.logout();
     setUser(null);
+    
+    // Dispatch custom event to notify other components of logout
+    window.dispatchEvent(new CustomEvent('auth-logout'));
+    
     router.push('/');
   };
 
@@ -119,7 +179,7 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
     );
   };
 
-  const categories = ['Photos', 'Illustrations', '3D'];
+  const categories = ['Photos', 'Interior', '3D'];
 
   return (
     <nav className="sticky top-0 z-50 bg-black border-gray-800 px-4 lg:px-8 py-4 font-inter mb-0">

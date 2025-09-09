@@ -34,6 +34,10 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     authService.logout();
+    
+    // Dispatch custom event to notify navbar of logout
+    window.dispatchEvent(new CustomEvent('auth-logout'));
+    
     router.push('/');
   };
 

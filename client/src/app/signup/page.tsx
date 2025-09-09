@@ -14,7 +14,7 @@ export default function SignUpPage() {
     // Check if user is already logged in
     const token = localStorage.getItem('access_token');
     if (token) {
-      router.push('/profile');
+      router.push('/');
     }
   }, [router]);
 

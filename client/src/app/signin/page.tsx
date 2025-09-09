@@ -14,7 +14,7 @@ export default function SignInPage() {
     // Check if user is already logged in
     const token = localStorage.getItem('access_token');
     if (token) {
-      router.push('/profile');
+      router.push('/');
     }
   }, [router]);
 
@@ -51,7 +51,11 @@ export default function SignInPage() {
       const tokens = await authService.login(email, password);
       localStorage.setItem('access_token', tokens.access_token);
       localStorage.setItem('refresh_token', tokens.refresh_token);
-      router.push('/profile');
+      
+      // Dispatch custom event to notify navbar of login
+      window.dispatchEvent(new CustomEvent('auth-login'));
+      
+      router.push('/');
     } catch (error: unknown) {
       console.error('Login failed:', error);
       const message = error instanceof Error && 'response' in error 

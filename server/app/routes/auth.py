@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Body
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
-from app.schemas import UserCreate, Token, User as UserSchema, LoginRequest
+from app.schemas import UserCreate, Token, User as UserSchema, LoginRequest, OAuthCallbackRequest
 from app.utils.auth import create_access_token, create_refresh_token, verify_access_token, verify_refresh_token, hash_password, verify_password
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import requests
@@ -45,8 +45,8 @@ async def get_google_auth_url():
     )
     return {"auth_url": auth_url}
 
-@router.post("/google/callback", response_model=Dict[str, str])
-async def google_oauth_callback(code: str, db: Session = Depends(get_db)):
+@router.post("/google/callback", response_model=Token)
+async def google_oauth_callback(request: OAuthCallbackRequest, db: Session = Depends(get_db)):
     """Handle Google OAuth callback"""
     try:
         # Exchange authorization code for access token
@@ -54,7 +54,7 @@ async def google_oauth_callback(code: str, db: Session = Depends(get_db)):
         data = {
             "client_id": GOOGLE_CLIENT_ID,
             "client_secret": GOOGLE_CLIENT_SECRET,
-            "code": code,
+            "code": request.code,
             "grant_type": "authorization_code",
             "redirect_uri": GOOGLE_REDIRECT_URI
         }
