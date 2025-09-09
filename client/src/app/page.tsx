@@ -6,6 +6,7 @@ import { authService, User, GeneratedImage } from '@/lib/auth';
 import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import PhotoHero from '@/components/photo_hero';
+import Toolbar from '@/components/Toolbar';
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -127,6 +128,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-black text-white">
       <Navbar />
       <PhotoHero onSearch={handleSearch} />
+      <Toolbar/>
     </div>
   );
 }

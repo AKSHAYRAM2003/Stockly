@@ -17,7 +17,8 @@ export default function PhotoHero({ onSearch }: PhotoHeroProps) {
   return (
     <div className="relative bg-black text-white overflow-hidden">
       {/* Background gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/50 via-black to-gray-900/50" />
+      {/* <div className="absolute inset-0 bg-gradient-to-br from-gray-900/50 via-black to-gray-900/50" /> */}
+      <div className="absolute" />
       
     <div className="relative z-10 container pl-2 py-2 md:py-1">
       {/* Search Bar */}
@@ -53,11 +54,11 @@ export default function PhotoHero({ onSearch }: PhotoHeroProps) {
 
       {/* Hero Text */}
       <div className="text-left">
-        
-        <h1 className="text-[9.6vw]  leading-[10vw] font-semibold md:text-[9.8vw] whitespace-nowrap mt-4 mb-2">
+
+        <h1 className="text-[9.6vw]  leading-[10vw]  font-semibold md:text-[9.8vw] whitespace-nowrap mt-4 mb-1">
         no more boring Images
         </h1>
-        <p className="text-left lg:text-[1.5vw] md:text-[1.5vw] sm:text-[1.1vw] mb-2 ml-1">
+        <p className="text-left lg:text-[1.5vw] md:text-[1.5vw] sm:text-[1.1vw] mb-3 ml-1">
         Create or use stunning AI-generated images and transform your creative vision.
         </p>
       </div>
@@ -70,3 +71,4 @@ export default function PhotoHero({ onSearch }: PhotoHeroProps) {
     
   );
 }
+
