@@ -7,23 +7,26 @@ import { AuthPage } from '@/components/ui/auth';
 
 export default function SignInPage() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
   const router = useRouter();
 
   useEffect(() => {
     // Check if user is already logged in
     const token = localStorage.getItem('access_token');
     if (token) {
-      router.push('/');
+      router.push('/profile');
     }
   }, [router]);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
+    setError(undefined);
     try {
       const { auth_url } = await authService.getGoogleAuthUrl();
       window.location.href = auth_url;
     } catch (error) {
       console.error('Failed to get Google auth URL:', error);
+      setError('Failed to connect to Google. Please try again.');
       setLoading(false);
     }
   };
@@ -34,6 +37,30 @@ export default function SignInPage() {
 
   const handleBackToHome = () => {
     router.push('/');
+  };
+
+  const handleEmailLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    setError(undefined);
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const tokens = await authService.login(email, password);
+      localStorage.setItem('access_token', tokens.access_token);
+      localStorage.setItem('refresh_token', tokens.refresh_token);
+      router.push('/profile');
+    } catch (error: unknown) {
+      console.error('Login failed:', error);
+      const message = error instanceof Error && 'response' in error 
+        ? (error as any).response?.data?.detail 
+        : 'Login failed. Please check your credentials and try again.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const testimonials = [
@@ -76,6 +103,7 @@ export default function SignInPage() {
       description="Sign in to create stunning AI-generated images and unlock your creative potential"
       heroImageSrc="https://images.unsplash.com/photo-1756992293716-b843700b5ab0?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
       testimonials={testimonials}
+      onAuth={handleEmailLogin}
       onGoogleAuth={handleGoogleLogin}
       onToggleMode={handleToggleToSignup}
       onBackToHome={handleBackToHome}
@@ -83,6 +111,7 @@ export default function SignInPage() {
         console.log('Reset password clicked');
       }}
       loading={loading}
+      error={error}
     />
   );
 }

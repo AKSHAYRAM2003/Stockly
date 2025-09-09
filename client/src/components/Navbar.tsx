@@ -88,6 +88,10 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
     router.push('/');
   };
 
+  const handleProfile = () => {
+    router.push('/profile');
+  };
+
   const focusSearchInput = () => {
     setTimeout(() => {
       const searchInputs = document.querySelectorAll('input[type="text"]');
@@ -246,7 +250,10 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
           <div className="flex items-center">
             {user ? (
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleProfile}
+                  className="flex items-center space-x-3 text-white hover:text-gray-300 transition-colors"
+                >
                   {user.avatar_url ? (
                     <img
                       src={user.avatar_url}
@@ -256,12 +263,12 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
                   ) : (
                     <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-medium">
-                        {user.name.charAt(0).toUpperCase()}
+                        {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
-                  <span className="text-white text-sm">{user.name}</span>
-                </div>
+                  <span className="text-sm">Profile</span>
+                </button>
                 <button
                   onClick={handleLogout}
                   className="text-gray-400 hover:text-white transition-colors text-sm"
@@ -387,7 +394,10 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
             <div className="flex items-center flex-shrink-0">
               {user ? (
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-3">
+                  <button
+                    onClick={handleProfile}
+                    className="flex items-center space-x-3 text-white hover:text-gray-300 transition-colors"
+                  >
                     {user.avatar_url ? (
                       <img
                         src={user.avatar_url}
@@ -397,12 +407,12 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
                     ) : (
                       <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-medium">
-                          {user.name.charAt(0).toUpperCase()}
+                          {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     )}
-                    <span className="text-white text-sm">{user.name}</span>
-                  </div>
+                    <span className="text-sm">Profile</span>
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="text-gray-400 hover:text-white transition-colors text-sm"
@@ -576,7 +586,13 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
             <div className="mt-4 pt-4 border-t border-gray-800 animate-in slide-in-from-top-2 duration-200">
               {user ? (
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                  <button
+                    onClick={() => {
+                      handleProfile();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center space-x-3 text-white hover:text-gray-300 transition-colors"
+                  >
                     {user.avatar_url ? (
                       <img
                         src={user.avatar_url}
@@ -586,12 +602,12 @@ export default function Navbar({ onCategoryChange, onSearch }: NavbarProps) {
                     ) : (
                       <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-medium">
-                          {user.name.charAt(0).toUpperCase()}
+                          {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     )}
-                    <span className="text-white text-sm">{user.name}</span>
-                  </div>
+                    <span className="text-sm">Profile</span>
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="text-gray-400 hover:text-white transition-colors text-sm"

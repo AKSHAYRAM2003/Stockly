@@ -7,23 +7,26 @@ import { AuthPage } from '@/components/ui/auth';
 
 export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
   const router = useRouter();
 
   useEffect(() => {
     // Check if user is already logged in
     const token = localStorage.getItem('access_token');
     if (token) {
-      router.push('/');
+      router.push('/profile');
     }
   }, [router]);
 
   const handleGoogleSignup = async () => {
     setLoading(true);
+    setError(undefined);
     try {
       const { auth_url } = await authService.getGoogleAuthUrl();
       window.location.href = auth_url;
     } catch (error) {
       console.error('Failed to get Google auth URL:', error);
+      setError('Failed to connect to Google. Please try again.');
       setLoading(false);
     }
   };
@@ -34,6 +37,31 @@ export default function SignUpPage() {
 
   const handleBackToHome = () => {
     router.push('/');
+  };
+
+  const handleEmailSignup = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    setError(undefined);
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
+
+    try {
+      await authService.register(email, password, firstName, lastName);
+      alert('Registration successful! Please sign in.');
+      router.push('/signin');
+    } catch (error: unknown) {
+      console.error('Registration failed:', error);
+      const message = error instanceof Error && 'response' in error 
+        ? (error as any).response?.data?.detail 
+        : 'Registration failed. Please try again.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const testimonials = [
@@ -83,6 +111,8 @@ export default function SignUpPage() {
         console.log('Reset password clicked');
       }}
       loading={loading}
+      error={error}
+      onAuth={handleEmailSignup}
     />
   );
 }

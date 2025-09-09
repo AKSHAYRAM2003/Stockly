@@ -30,6 +30,7 @@ interface AuthPageProps {
   onToggleMode?: () => void;
   onBackToHome?: () => void;
   loading?: boolean;
+  error?: string;
 }
 
 // --- SUB-COMPONENTS ---
@@ -70,6 +71,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   onToggleMode,
   onBackToHome,
   loading = false,
+  error,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -102,6 +104,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             <p className="animate-element animate-delay-200 text-gray-400 text-sm md:text-base">
               {description || defaultDescription}
             </p>
+
+            {error && (
+              <div className="animate-element animate-delay-250 bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
 
             <form className="space-y-4 md:space-y-5" onSubmit={onAuth}>
               {/* Name fields for signup only */}
