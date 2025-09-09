@@ -2,13 +2,14 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
-from app.schemas import UserCreate, Token, User
-from app.utils.auth import create_access_token, create_refresh_token, verify_refresh_token
+from app.schemas import UserCreate, Token, User as UserSchema, LoginRequest
+from app.utils.auth import create_access_token, create_refresh_token, verify_access_token, verify_refresh_token, hash_password, verify_password
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import requests
 import os
 from dotenv import load_dotenv
 from typing import Dict
+import uuid
 
 load_dotenv()
 
@@ -21,7 +22,7 @@ GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3000/au
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
     token = credentials.credentials
-    user_id = verify_refresh_token(token)  # Use refresh token for user verification
+    user_id = verify_access_token(token)  # Use access token for user verification
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -73,11 +74,19 @@ async def google_oauth_callback(code: str, db: Session = Depends(get_db)):
         # Check if user exists, create if not
         user = db.query(User).filter(User.google_id == user_data["id"]).first()
         if not user:
+            # Parse name into first and last name
+            full_name = user_data["name"]
+            name_parts = full_name.split(" ", 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ""
+            
             user = User(
                 id=user_data["id"],
                 google_id=user_data["id"],
                 email=user_data["email"],
-                name=user_data["name"],
+                first_name=first_name,
+                last_name=last_name,
+                name=full_name,
                 avatar_url=user_data.get("picture")
             )
             db.add(user)
@@ -133,7 +142,7 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
         "token_type": "bearer"
     }
 
-@router.get("/me", response_model=User)
+@router.get("/me", response_model=UserSchema)
 async def get_current_user_profile(current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
     """Get current user profile"""
     user = db.query(User).filter(User.id == current_user_id).first()
@@ -143,6 +152,65 @@ async def get_current_user_profile(current_user_id: str = Depends(get_current_us
             detail="User not found"
         )
     return user
+
+@router.post("/register", response_model=UserSchema)
+async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
+    """Register a new user with email and password"""
+    # Check if user already exists
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    
+    # Hash the password
+    hashed_password = hash_password(user_data.password)
+    
+    # Create new user
+    new_user = User(
+        id=str(uuid.uuid4()),
+        email=user_data.email,
+        first_name=user_data.first_name,
+        last_name=user_data.last_name,
+        name=f"{user_data.first_name} {user_data.last_name}",
+        password_hash=hashed_password,
+        avatar_url=user_data.avatar_url
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return new_user
+
+@router.post("/login", response_model=Token)
+async def login_user(login_data: LoginRequest, db: Session = Depends(get_db)):
+    """Login user with email and password"""
+    # Find user by email
+    user = db.query(User).filter(User.email == login_data.email).first()
+    if not user or not user.password_hash:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    # Verify password
+    if not verify_password(login_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    # Create tokens
+    access_token = create_access_token(data={"sub": user.id})
+    refresh_token = create_refresh_token(data={"sub": user.id})
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
 
 @router.post("/logout")
 async def logout():

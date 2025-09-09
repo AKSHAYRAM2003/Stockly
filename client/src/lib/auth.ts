@@ -3,6 +3,8 @@ import api from './api';
 export interface User {
   id: string;
   email: string;
+  first_name: string;
+  last_name: string;
   name: string;
   avatar_url?: string;
 }
@@ -32,6 +34,21 @@ export const authService = {
 
   async handleGoogleCallback(code: string): Promise<AuthTokens> {
     const response = await api.post('/api/auth/google/callback', { code });
+    return response.data;
+  },
+
+  async register(email: string, password: string, firstName: string, lastName: string): Promise<User> {
+    const response = await api.post('/api/auth/register', { 
+      email, 
+      password, 
+      first_name: firstName,
+      last_name: lastName
+    });
+    return response.data;
+  },
+
+  async login(email: string, password: string): Promise<AuthTokens> {
+    const response = await api.post('/api/auth/login', { email, password });
     return response.data;
   },
 
