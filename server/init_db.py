@@ -7,11 +7,20 @@ Creates all database tables
 from app.database import engine, Base
 from app.models.user import User
 from app.models.generated_image import GeneratedImage
+from sqlalchemy import text
 
 def init_database():
     """Initialize database tables"""
     try:
         print("Creating database tables...")
+        
+        # Drop existing tables if they exist (for development)
+        print("Dropping existing tables...")
+        with engine.connect() as conn:
+            conn.execute(text("DROP TABLE IF EXISTS generated_images"))
+            conn.execute(text("DROP TABLE IF EXISTS users"))
+            conn.commit()
+        
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables created successfully!")
         print("\nCreated tables:")
