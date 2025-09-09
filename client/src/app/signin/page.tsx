@@ -48,13 +48,13 @@ export default function SignInPage() {
       name: "Sarah Rodriguez",
       handle: "@sarahdesigns",
       text: "The AI-generated images are incredibly detailed and professional."
-    },
-    {
-      avatarSrc: "https://www.lummi.ai/api/render/image/8a9a5f1f-f2aa-47e7-b91f-1ae13f11c6e5?token=eyJhbGciOiJIUzI1NiJ9.eyJpZHMiOlsiOGE5YTVmMWYtZjJhYS00N2U3LWI5MWYtMWFlMTNmMTFjNmU1Il0sInJlc29sdXRpb24iOiJtZWRpdW0iLCJyZW5kZXJTcGVjcyI6eyJlZmZlY3RzIjp7InJlZnJhbWUiOnt9fX0sInNob3VsZEF1dG9Eb3dubG9hZCI6ZmFsc2UsImp0aSI6IjVheHRaTkhnQ2tkRWs0aENEdE04SSIsImlhdCI6MTc1NzM0MjExNiwiZXhwIjoxNzU3MzQyMTc2fQ.vZdv_-Ez8lNuPrR98aRYRGId_vnvpw6lw-NP5POlp6U",
-      name: "Mike Thompson",
-      handle: "@mikethompson",
-      text: "Perfect for creating unique artwork and illustrations quickly."
     }
+    // {
+    //   avatarSrc: "https://www.lummi.ai/api/render/image/8a9a5f1f-f2aa-47e7-b91f-1ae13f11c6e5?token=eyJhbGciOiJIUzI1NiJ9.eyJpZHMiOlsiOGE5YTVmMWYtZjJhYS00N2U3LWI5MWYtMWFlMTNmMTFjNmU1Il0sInJlc29sdXRpb24iOiJtZWRpdW0iLCJyZW5kZXJTcGVjcyI6eyJlZmZlY3RzIjp7InJlZnJhbWUiOnt9fX0sInNob3VsZEF1dG9Eb3dubG9hZCI6ZmFsc2UsImp0aSI6IjVheHRaTkhnQ2tkRWs0aENEdE04SSIsImlhdCI6MTc1NzM0MjExNiwiZXhwIjoxNzU3MzQyMTc2fQ.vZdv_-Ez8lNuPrR98aRYRGId_vnvpw6lw-NP5POlp6U",
+    //   name: "Mike Thompson",
+    //   handle: "@mikethompson",
+    //   text: "Perfect for creating unique artwork and illustrations quickly."
+    // }
   ];
 
   return (

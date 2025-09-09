@@ -48,14 +48,13 @@ export default function SignUpPage() {
       name: "David Park",
       handle: "@davidpark",
       text: "The quality of generated images exceeded my expectations completely."
-    },
-    {
-      avatarSrc: "https://images.unsplash.com/photo-1494790108755-2616b612b76c?w=40&h=40&fit=crop&crop=face",
-      name: "Lisa Garcia",
-      handle: "@lisagarcia",
-      text: "Stockly transformed how I approach creative projects and presentations."
     }
-
+    // {
+    //   avatarSrc: "https://images.unsplash.com/photo-1494790108755-2616b612b76c?w=40&h=40&fit=crop&crop=face",
+    //   name: "Lisa Garcia",
+    //   handle: "@lisagarcia",
+    //   text: "Stockly transformed how I approach creative projects and presentations."
+    // }
   ];
 
   return (
