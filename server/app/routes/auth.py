@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status, Body
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
-from app.schemas import UserCreate, Token, User as UserSchema, LoginRequest, OAuthCallbackRequest
+from app.schemas import UserCreate, Token, User as UserSchema, LoginRequest, OAuthCallbackRequest, UserUpdate
 from app.utils.auth import create_access_token, create_refresh_token, verify_access_token, verify_refresh_token, hash_password, verify_password
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import requests
@@ -10,8 +10,15 @@ import os
 from dotenv import load_dotenv
 from typing import Dict
 import uuid
+import secrets
+from datetime import datetime
 
 load_dotenv()
+
+def generate_user_id(first_name: str, last_name: str) -> str:
+    base = f"{first_name.lower()}{last_name.lower()}"
+    unique = secrets.token_hex(4)
+    return f"{base}{unique}"
 
 router = APIRouter()
 security = HTTPBearer()
@@ -82,6 +89,7 @@ async def google_oauth_callback(request: OAuthCallbackRequest, db: Session = Dep
             
             user = User(
                 id=user_data["id"],
+                user_id=generate_user_id(first_name, last_name),
                 google_id=user_data["id"],
                 email=user_data["email"],
                 first_name=first_name,
@@ -170,6 +178,7 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     # Create new user
     new_user = User(
         id=str(uuid.uuid4()),
+        user_id=generate_user_id(user_data.first_name, user_data.last_name),
         email=user_data.email,
         first_name=user_data.first_name,
         last_name=user_data.last_name,
@@ -216,3 +225,44 @@ async def login_user(login_data: LoginRequest, db: Session = Depends(get_db)):
 async def logout():
     """Logout endpoint (client should discard tokens)"""
     return {"message": "Successfully logged out"}
+
+@router.get("/user/{user_id}", response_model=UserSchema)
+async def get_user_by_user_id(user_id: str, db: Session = Depends(get_db)):
+    """Get user profile by user_id"""
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return user
+
+@router.put("/me", response_model=UserSchema)
+async def update_current_user(
+    user_update: UserUpdate,
+    current_user_id: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update current user profile"""
+    user = db.query(User).filter(User.id == current_user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Update fields if provided
+    update_data = user_update.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(user, field, value)
+    
+    # Update name if first_name or last_name changed
+    if 'first_name' in update_data or 'last_name' in update_data:
+        user.name = f"{user.first_name} {user.last_name}"
+    
+    user.updated_at = datetime.utcnow()
+    
+    db.commit()
+    db.refresh(user)
+    
+    return user

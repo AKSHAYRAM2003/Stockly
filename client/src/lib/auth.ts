@@ -2,6 +2,7 @@ import api from './api';
 
 export interface User {
   id: string;
+  user_id: string;
   email: string;
   first_name: string;
   last_name: string;
@@ -59,6 +60,16 @@ export const authService = {
 
   async getCurrentUser(): Promise<User> {
     const response = await api.get('/api/auth/me');
+    return response.data;
+  },
+
+  async getUserByUserId(userId: string): Promise<User> {
+    const response = await api.get(`/api/auth/user/${userId}`);
+    return response.data;
+  },
+
+  async updateUser(updates: Partial<Pick<User, 'first_name' | 'last_name' | 'name' | 'avatar_url'>>): Promise<User> {
+    const response = await api.put('/api/auth/me', updates);
     return response.data;
   },
 

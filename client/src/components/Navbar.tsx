@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService, User } from '@/lib/auth';
-import { Search, Send, Command, Menu, X, SparklesIcon } from 'lucide-react';
+import { Search, Send, Command, Menu, X, SparklesIcon, ChevronDown, Settings, LogOut, User2Icon, Settings2 } from 'lucide-react';
 
 interface NavbarProps {
   onCategoryChange?: (category: string) => void;
@@ -16,6 +16,7 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
   const [searchQuery, setSearchQuery] = useState('');
   const [searchMode, setSearchMode] = useState<'search' | 'generate'>('search');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -73,14 +74,21 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
       setUser(null);
     };
 
+    const handleUserUpdated = (e: CustomEvent<User>) => {
+      // User profile updated - update user state
+      setUser(e.detail);
+    };
+
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('auth-login', handleAuthLogin);
     window.addEventListener('auth-logout', handleAuthLogout);
+    window.addEventListener('user-updated', handleUserUpdated as EventListener);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('auth-login', handleAuthLogin);
       window.removeEventListener('auth-logout', handleAuthLogout);
+      window.removeEventListener('user-updated', handleUserUpdated as EventListener);
     };
   }, []);
 
@@ -111,6 +119,24 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Handle click outside to close profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.profile-dropdown')) {
+        setProfileDropdownOpen(false);
+      }
+    };
+
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileDropdownOpen]);
+
   const handleCategoryClick = (category: string) => {
     onCategoryChange?.(category);
     // Navigate to the appropriate page based on category
@@ -138,18 +164,33 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
     router.push('/signup');
   };
 
+  const handleProfile = () => {
+    if (user?.user_id) {
+      router.push(`/profile/${user.user_id}`);
+    }
+  };
+
+  const handleViewProfile = () => {
+    setProfileDropdownOpen(false);
+    setMobileMenuOpen(false); // Close mobile menu if open
+    handleProfile();
+  };
+
+  const handleAccountSettings = () => {
+    setProfileDropdownOpen(false);
+    setMobileMenuOpen(false); // Close mobile menu if open
+    router.push('/account-settings');
+  };
+
   const handleLogout = () => {
+    setProfileDropdownOpen(false);
+    setMobileMenuOpen(false); // Close mobile menu if open
     authService.logout();
-    setUser(null);
     
-    // Dispatch custom event to notify other components of logout
+    // Dispatch custom event to notify navbar of logout
     window.dispatchEvent(new CustomEvent('auth-logout'));
     
     router.push('/');
-  };
-
-  const handleProfile = () => {
-    router.push('/profile');
   };
 
   const focusSearchInput = () => {
@@ -310,31 +351,56 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
           <div className="flex items-center">
             {user ? (
               <div className="flex items-center space-x-4">
-                <button
-                  onClick={handleProfile}
-                  className="flex items-center space-x-3 text-white hover:text-gray-300 transition-colors"
-                >
-                  {user.avatar_url ? (
-                    <img
-                      src={user.avatar_url}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
-                        {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
-                      </span>
+                <div className="relative profile-dropdown">
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center space-x-3 text-lg font-semibold text-white hover:text-gray-300 transition-colors"
+                  >
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name}
+                        className="w-12 h-12 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-lg font-medium">
+                          {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <span className="text-lg font-semibold">Profile</span>
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {/* Dropdown Menu */}
+                  {profileDropdownOpen && (
+                    <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+                      <button
+                        onClick={handleViewProfile}
+                        className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
+                      >
+                        <span><User2Icon/></span>
+                        <span>View profile</span>
+                      </button>
+                      <button
+                        onClick={handleAccountSettings}
+                        className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
+                      >
+                        <span><Settings/></span>
+                        <span>Account settings</span>
+                      </button>
+                      <div className="border-t border-gray-700 my-2"></div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-red-950 transition-colors flex items-center space-x-3"
+                      >
+                        <span><LogOut/></span>
+                        <span>Logout</span>
+                      </button>
                     </div>
                   )}
-                  <span className="text-sm">Profile</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
-                >
-                  Log out
-                </button>
+                </div>
               </div>
             ) : (
               <div className="flex items-center space-x-5 text-md">
@@ -454,31 +520,56 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
             <div className="flex items-center flex-shrink-0">
               {user ? (
                 <div className="flex items-center space-x-4">
-                  <button
-                    onClick={handleProfile}
-                    className="flex items-center space-x-3 text-white hover:text-gray-300 transition-colors"
-                  >
-                    {user.avatar_url ? (
-                      <img
-                        src={user.avatar_url}
-                        alt={user.name}
-                        className="w-8 h-8 rounded-full"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
-                        </span>
+                  <div className="relative profile-dropdown">
+                    <button
+                      onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                      className="flex items-center space-x-3 text-lg font-semibold text-white hover:text-gray-300 transition-colors"
+                    >
+                      {user.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt={user.name}
+                          className="w-12 h-12 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-lg font-medium">
+                            {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <span className="text-lg font-semibold">Profile</span>
+                      <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    {profileDropdownOpen && (
+                      <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+                        <button
+                          onClick={handleViewProfile}
+                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                        >
+                          <span><User2Icon/></span>
+                          <span>View profile</span>
+                        </button>
+                        <button
+                          onClick={handleAccountSettings}
+                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                        >
+                          <span><Settings/></span>
+                          <span>Account settings</span>
+                        </button>
+                        <div className="border-t border-gray-700 my-2"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                        >
+                          <span><LogOut/></span>
+                          <span>Logout</span>
+                        </button>
                       </div>
                     )}
-                    <span className="text-sm">Profile</span>
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="text-gray-400 hover:text-white transition-colors text-sm"
-                  >
-                    Log out
-                  </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">
@@ -646,34 +737,56 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
             <div className="mt-4 pt-4 border-t border-gray-800 animate-in slide-in-from-top-2 duration-200">
               {user ? (
                 <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => {
-                      handleProfile();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="flex items-center space-x-3 text-white hover:text-gray-300 transition-colors"
-                  >
-                    {user.avatar_url ? (
-                      <img
-                        src={user.avatar_url}
-                        alt={user.name}
-                        className="w-8 h-8 rounded-full"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
-                        </span>
+                  <div className="relative profile-dropdown">
+                    <button
+                      onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                      className="flex items-center space-x-3 text-lg font-semibold text-white hover:text-gray-300 transition-colors"
+                    >
+                      {user.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt={user.name}
+                          className="w-12 h-12 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-lg font-medium">
+                            {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <span className="text-lg font-semibold">Profile</span>
+                      <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    {profileDropdownOpen && (
+                      <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+                        <button
+                          onClick={handleViewProfile}
+                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                        >
+                          <span>👤</span>
+                          <span>View profile</span>
+                        </button>
+                        <button
+                          onClick={handleAccountSettings}
+                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                        >
+                          <span>⚙️</span>
+                          <span>Account settings</span>
+                        </button>
+                        <div className="border-t border-gray-700 my-2"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                        >
+                          <span>🚪</span>
+                          <span>Logout</span>
+                        </button>
                       </div>
                     )}
-                    <span className="text-sm">Profile</span>
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="text-gray-400 hover:text-white transition-colors text-sm"
-                  >
-                    Log out
-                  </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-4">

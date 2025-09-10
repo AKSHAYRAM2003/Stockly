@@ -20,6 +20,7 @@ class UserUpdate(BaseModel):
 
 class User(UserBase):
     id: str
+    user_id: str
     google_id: Optional[str] = None
     is_verified: bool = False
     created_at: datetime
