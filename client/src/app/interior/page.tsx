@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import InteriorHero from '@/components/interior_hero';
 import Toolbar from '@/components/Toolbar';
 import ImageGallery from '@/components/ImageGallery';
+import PageTransition from '@/components/PageTransition';
 
 // Placeholder images for the grid - using Unsplash AI-generated images
 const placeholderImages = [
@@ -154,15 +155,17 @@ export default function InteriorPage() {
   const displayImages = user ? filteredImages : featuredImages.filter(img => img.category === category);
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Navbar onCategoryChange={handleCategoryChange} onSearch={handleSearch} activeCategory={category} />
-      <InteriorHero onSearch={handleSearch} />
-      <Toolbar/>
+    <PageTransition>
+      <div className="min-h-screen bg-black text-white">
+        <Navbar onCategoryChange={handleCategoryChange} onSearch={handleSearch} activeCategory={category} />
+        <InteriorHero onSearch={handleSearch} />
+        <Toolbar/>
 
-      {/* Image Showcase Grid */}
-      <div className="container mx-auto px-4 py-12 max-w-full overflow-hidden">
-        <ImageGallery images={placeholderImages} />
+        {/* Image Showcase Grid */}
+        <div className="container mx-auto px-4 py-12 max-w-full overflow-hidden">
+          <ImageGallery images={placeholderImages} />
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }

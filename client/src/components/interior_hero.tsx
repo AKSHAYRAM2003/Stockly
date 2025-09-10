@@ -26,12 +26,11 @@ export default function InteriorHero({ onSearch }: InteriorHeroProps) {
 
       {/* Hero Text */}
       <div className="text-left">
-
-        <h1 className="text-[9.6vw] leading-[10vw] font-semibold md:text-[9.7vw] whitespace-nowrap mt-2 mb-1 text-center">
-        Transform Your Space
+        <h1 className="text-[9.6vw] leading-[10vw] font-semibold md:text-[9.7vw] whitespace-nowrap mt-2 mb-1 text-left">
+          Say bye to dull Interiors
         </h1>
-        <p className="text-left lg:text-[1.5vw] md:text-[1.5vw] sm:text-[1.1vw] mb-3 ml-2">
-        Create stunning interior designs and transform your living spaces with AI-powered creativity.
+        <p className="text-left lg:text-[1.5vw] tracking-tight md:text-[1.5vw] sm:text-[1.1vw] mb-3 ml-2">
+          Create stunning interior designs and transform your living spaces with AI-powered creativity.
         </p>
       </div>
     </div>

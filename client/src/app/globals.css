@@ -107,6 +107,17 @@
       transform: translateY(0);
     }
   }
+
+  @keyframes fadeInCategory {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 
@@ -256,4 +267,8 @@
 
 .font-geist {
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.category-fade-in {
+  animation: fadeInCategory 0.5s cubic-bezier(0.4,0,0.2,1);
 }

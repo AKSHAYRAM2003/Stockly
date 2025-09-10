@@ -26,12 +26,11 @@ export default function ThreeDHero({ onSearch }: ThreeDHeroProps) {
 
       {/* Hero Text */}
       <div className="text-left">
-
-        <h1 className="text-[9.6vw] leading-[10vw] font-semibold md:text-[9.7vw] whitespace-nowrap mt-2 mb-1 text-center">
-        Bring Ideas to Life
+        <h1 className="text-[9.6vw] leading-[10vw] font-semibold md:text-[9.7vw] whitespace-nowrap mt-2 mb-1 text-left">
+          Bring Ideas to Life
         </h1>
         <p className="text-left lg:text-[1.5vw] md:text-[1.5vw] sm:text-[1.1vw] mb-3 ml-2">
-        Generate breathtaking 3D models and visualizations that push the boundaries of imagination.
+          Generate breathtaking 3D models and visualizations that push the boundaries of imagination.
         </p>
       </div>
     </div>

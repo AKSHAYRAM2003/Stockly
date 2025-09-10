@@ -14,7 +14,17 @@ export default function SignInPage() {
     // Check if user is already logged in
     const token = localStorage.getItem('access_token');
     if (token) {
-      router.push('/');
+      const checkAuth = async () => {
+        try {
+          await authService.getCurrentUser();
+          router.push('/');
+        } catch (error) {
+          // Token is invalid, clear it
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+        }
+      };
+      checkAuth();
     }
   }, [router]);
 
