@@ -393,7 +393,7 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                       <div className="border-t border-gray-700 my-2"></div>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-red-950 transition-colors flex items-center space-x-3"
+                        className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-red-950  transition-colors flex items-center space-x-3"
                       >
                         <span><LogOut/></span>
                         <span>Logout</span>

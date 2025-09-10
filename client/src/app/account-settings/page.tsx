@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authService, User } from '@/lib/auth';
 import Navbar from '@/components/Navbar';
 import { Camera, Save, X, User as UserIcon } from 'lucide-react';
+import { useToast } from '@/components/ToastProvider';
 
 export default function AccountSettingsPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -17,6 +18,7 @@ export default function AccountSettingsPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -77,11 +79,11 @@ export default function AccountSettingsPage() {
         setUser(updatedUser);
         // Dispatch custom event to update navbar
         window.dispatchEvent(new CustomEvent('user-updated', { detail: updatedUser }));
-        alert('Profile updated successfully!');
+        showToast('success', 'Profile Updated!', 'Your profile has been successfully updated.');
       }
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert('Failed to update profile. Please try again.');
+      showToast('error', 'Update Failed', 'We couldn\'t update your profile. Please check your connection and try again.');
     } finally {
       setSaving(false);
     }
@@ -119,7 +121,7 @@ export default function AccountSettingsPage() {
     <div className="min-h-screen bg-black text-white">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-gray-900 rounded-lg p-8">
+        <div className="bg-neutral-900 rounded-lg p-8">
           <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
 
           {/* Profile Picture Section */}
@@ -171,8 +173,8 @@ export default function AccountSettingsPage() {
                   type="text"
                   value={formData.first_name}
                   onChange={(e) => handleInputChange('first_name', e.target.value)}
-                  className={`w-full px-4 py-3 bg-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 transition-colors ${
-                    errors.first_name ? 'border-red-500' : 'border-gray-700'
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-colors ${
+                    errors.first_name ? 'border-red-500' : 'border-neutral-700'
                   }`}
                   placeholder="Enter your first name"
                 />
@@ -189,8 +191,8 @@ export default function AccountSettingsPage() {
                   type="text"
                   value={formData.last_name}
                   onChange={(e) => handleInputChange('last_name', e.target.value)}
-                  className={`w-full px-4 py-3 bg-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600 transition-colors ${
-                    errors.last_name ? 'border-red-500' : 'border-gray-700'
+                  className={`w-full px-4 py-3  border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-600 transition-colors ${
+                    errors.last_name ? 'border-red-500' : 'border-neutral-700'
                   }`}
                   placeholder="Enter your last name"
                 />
@@ -208,7 +210,7 @@ export default function AccountSettingsPage() {
                 type="email"
                 value={user.email}
                 disabled
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg cursor-not-allowed opacity-60"
+                className="w-full px-4 py-3 bg-neutral-700 border border-neutral-600 rounded-lg cursor-not-allowed opacity-60 select-none"
               />
               <p className="text-gray-500 text-sm mt-1">
                 Email cannot be changed. Contact support if needed.
@@ -220,7 +222,7 @@ export default function AccountSettingsPage() {
           <div className="flex justify-end space-x-4">
             <button
               onClick={() => router.back()}
-              className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center space-x-2"
+              className="px-6 py-3 bg-neutral-700 text-white rounded-lg hover:bg-red-500 transition-colors flex items-center space-x-2"
             >
               <X className="w-4 h-4" />
               <span>Cancel</span>
@@ -228,7 +230,7 @@ export default function AccountSettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+              className="px-6 py-3 bg-white text-black rounded-lg hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
             >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Saving...' : 'Save Changes'}</span>

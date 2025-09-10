@@ -9,6 +9,7 @@ import PhotoHero from '@/components/photo_hero';
 import Toolbar from '@/components/Toolbar';
 import ImageGallery from '@/components/ImageGallery';
 import PageTransition from '@/components/PageTransition';
+import { useToast } from '@/components/ToastProvider';
 
 // Placeholder images for the grid - using Unsplash AI-generated images
 const placeholderImages = [
@@ -39,6 +40,7 @@ export default function Dashboard() {
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [featuredImages, setFeaturedImages] = useState<GeneratedImage[]>([]);
   const router = useRouter();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -120,8 +122,10 @@ export default function Dashboard() {
       const newImage = response.data;
       setImages([newImage, ...images]);
       setPrompt('');
+      showToast('success', 'Image Generated!', 'Your AI-generated image has been created successfully.');
     } catch (error) {
       console.error('Failed to generate image:', error);
+      showToast('error', 'Generation Failed', 'We couldn\'t generate your image. Please check your prompt and try again.');
     } finally {
       setLoading(false);
     }

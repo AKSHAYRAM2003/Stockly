@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/lib/auth';
 import { AuthPage } from '@/components/ui/auth';
+import { useToast } from '@/components/ToastProvider';
 
 export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const router = useRouter();
+  const { showToast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -65,13 +67,14 @@ export default function SignInPage() {
       // Dispatch custom event to notify navbar of login
       window.dispatchEvent(new CustomEvent('auth-login'));
       
+      showToast('success', 'Welcome Back!', 'You have been successfully signed in.');
       router.push('/');
     } catch (error: unknown) {
       console.error('Login failed:', error);
       const message = error instanceof Error && 'response' in error 
         ? (error as any).response?.data?.detail 
         : 'Login failed. Please check your credentials and try again.';
-      setError(message);
+      showToast('error', 'Login Failed', message);
     } finally {
       setLoading(false);
     }

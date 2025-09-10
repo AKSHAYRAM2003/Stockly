@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/lib/auth';
 import { AuthPage } from '@/components/ui/auth';
+import { useToast } from '@/components/ToastProvider';
 
 export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const router = useRouter();
+  const { showToast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -61,14 +63,14 @@ export default function SignUpPage() {
 
     try {
       await authService.register(email, password, firstName, lastName);
-      alert('Registration successful! Please sign in.');
+      showToast('success', 'Account Created!', 'Your account has been created successfully. Please sign in to continue.');
       router.push('/signin');
     } catch (error: unknown) {
       console.error('Registration failed:', error);
       const message = error instanceof Error && 'response' in error 
         ? (error as any).response?.data?.detail 
         : 'Registration failed. Please try again.';
-      setError(message);
+      showToast('error', 'Registration Failed', message);
     } finally {
       setLoading(false);
     }
