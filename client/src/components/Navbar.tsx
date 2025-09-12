@@ -402,7 +402,7 @@ export default function Navbar({ onCategoryChange, onSearch, onGenerate, activeC
                   
                   {/* Dropdown Menu */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+                    <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-[60] animate-in fade-in-0 zoom-in-95 duration-200">
                       <button
                         onClick={handleViewProfile}
                         className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
@@ -571,7 +571,7 @@ export default function Navbar({ onCategoryChange, onSearch, onGenerate, activeC
                     
                     {/* Dropdown Menu */}
                     {profileDropdownOpen && (
-                      <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+                      <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-[60] animate-in fade-in-0 zoom-in-95 duration-200">
                         <button
                           onClick={handleViewProfile}
                           className="w-full text-left px-4 py-3 text-base text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
@@ -751,7 +751,7 @@ export default function Navbar({ onCategoryChange, onSearch, onGenerate, activeC
                   
                   {/* Mobile Dropdown Menu */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-3 w-48 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+                    <div className="absolute right-0 mt-3 w-48 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-[60] animate-in fade-in-0 zoom-in-95 duration-200">
                       <button
                         onClick={handleViewProfile}
                         className="w-full text-left px-4 py-3 text-sm text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
