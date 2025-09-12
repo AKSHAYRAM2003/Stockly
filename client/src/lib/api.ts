@@ -29,28 +29,51 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    if (error.response?.status === 401 && !originalRequest._retry && !(originalRequest as any)._skipRetry) {
+      (originalRequest as any)._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refresh_token');
-        if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-            refresh_token: refreshToken,
-          });
-
-          const { access_token, refresh_token } = response.data;
-          localStorage.setItem('access_token', access_token);
-          localStorage.setItem('refresh_token', refresh_token);
-
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
-          return api(originalRequest);
+        if (!refreshToken) {
+          // No refresh token, redirect to login
+          localStorage.removeItem('access_token');
+          window.location.href = '/signin';
+          return Promise.reject(error);
         }
+
+        // Attempt to refresh token
+        const response = await axios.post(
+          `${API_BASE_URL}/api/auth/refresh`,
+          {
+            refresh_token: refreshToken,
+          },
+          {
+            _skipRetry: true, // Prevent infinite loop
+          }
+        );
+
+        const { access_token, refresh_token: new_refresh_token } = response.data;
+
+        // Update stored tokens
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('refresh_token', new_refresh_token);
+
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, redirect to login
+        console.error('Token refresh failed:', refreshError);
+
+        // Clear tokens and redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/signin';
+
+        // Only redirect if not already on signin page
+        if (!window.location.pathname.includes('/signin')) {
+          window.location.href = '/signin';
+        }
+
+        return Promise.reject(refreshError);
       }
     }
 

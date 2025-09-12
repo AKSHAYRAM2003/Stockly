@@ -271,6 +271,36 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {/* Toolbar - only show for own profile */}
+          {/* {isOwnProfile && (
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="relative">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700">
+                  <span>Tools</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="relative">
+                <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700">
+                  <Filter className="w-4 h-4" />
+                  <span>Type of image</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700">
+                <Wand2 className="w-4 h-4" />
+                <span>Reframe</span>
+              </button>
+              
+              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700">
+                <Eraser className="w-4 h-4" />
+                <span>Background removal</span>
+              </button>
+            </div>
+          )} */}
+
           {/* Gallery Section */}
           {activeTab === 'Creations' && (
             <div>

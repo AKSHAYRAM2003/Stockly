@@ -4,16 +4,10 @@ import { useState } from 'react';
 
 interface PhotoHeroProps {
   onSearch?: (query: string) => void;
+  onGenerate?: (query: string) => void;
 }
 
-export default function PhotoHero({ onSearch }: PhotoHeroProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch?.(searchQuery);
-  };
-
+export default function PhotoHero({ onSearch, onGenerate }: PhotoHeroProps) {
   return (
     <div className="relative bg-black text-white overflow-hidden">
       {/* Background gradient overlay */}
@@ -21,9 +15,6 @@ export default function PhotoHero({ onSearch }: PhotoHeroProps) {
       <div className="absolute" />
       
     <div className="relative z-10 container pl-2 py-2 md:py-1">
-      {/* Search Bar */}
-     
-
       {/* Hero Text */}
       <div className="text-left">
 

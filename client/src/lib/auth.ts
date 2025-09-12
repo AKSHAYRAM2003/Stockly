@@ -34,8 +34,21 @@ export const authService = {
   },
 
   async handleGoogleCallback(code: string): Promise<AuthTokens> {
-    const response = await api.post('/api/auth/google/callback', { code });
-    return response.data;
+    try {
+      const response = await api.post('/api/auth/google/callback', { code });
+
+      if (!response.data || !response.data.access_token || !response.data.refresh_token) {
+        throw new Error('Invalid response from authentication server');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Google callback error:', error);
+      if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw error;
+    }
   },
 
   async register(email: string, password: string, firstName: string, lastName: string): Promise<User> {
@@ -54,13 +67,35 @@ export const authService = {
   },
 
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
-    const response = await api.post('/api/auth/refresh', { refresh_token: refreshToken });
-    return response.data;
+    try {
+      const response = await api.post('/api/auth/refresh', { refresh_token: refreshToken });
+
+      if (!response.data || !response.data.access_token || !response.data.refresh_token) {
+        throw new Error('Invalid response from token refresh');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Token refresh error:', error);
+      if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw error;
+    }
   },
 
   async getCurrentUser(): Promise<User> {
-    const response = await api.get('/api/auth/me');
-    return response.data;
+    try {
+      const response = await api.get('/api/auth/me');
+      return response.data;
+    } catch (error: any) {
+      console.error('Get current user error:', error);
+      if (error.response?.status === 401) {
+        // Token is invalid, clear it
+        this.logout();
+      }
+      throw error;
+    }
   },
 
   async getUserByUserId(userId: string): Promise<User> {

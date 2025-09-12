@@ -18,9 +18,6 @@ htmlcov/
 .pyre/
 .pytype/
 .ipynb_checkpoints/
-*.iml
-__init__.py
-file
-
+server/secret
 
 

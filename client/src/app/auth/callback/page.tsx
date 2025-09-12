@@ -14,26 +14,59 @@ function AuthCallbackContent() {
   useEffect(() => {
     const handleCallback = async () => {
       const code = searchParams.get("code");
+      const error = searchParams.get("error");
+
+      if (error) {
+        console.error("OAuth error:", error);
+        const errorMessage = `Authentication failed: ${error}`;
+        setError(errorMessage);
+        showToast("error", "Sign In Failed", errorMessage);
+        return;
+      }
+
       if (code) {
         try {
           const tokens = await authService.handleGoogleCallback(code);
+
+          // Validate tokens
+          if (!tokens.access_token || !tokens.refresh_token) {
+            throw new Error("Invalid tokens received");
+          }
+
           localStorage.setItem("access_token", tokens.access_token);
           localStorage.setItem("refresh_token", tokens.refresh_token);
 
           // Dispatch custom event to notify navbar of login
           window.dispatchEvent(new CustomEvent("auth-login"));
 
-          router.push("/");
+          // Get user info to redirect to profile
+          const user = await authService.getCurrentUser();
+
+          if (!user || !user.user_id) {
+            throw new Error("Failed to get user information");
+          }
+
+          router.push(`/profile/${user.user_id}`);
         } catch (error) {
           console.error("Auth callback failed:", error);
-          const errorMessage = "Failed to complete sign in with Google. Please try again.";
+          const errorMessage = error instanceof Error ? error.message : "Failed to complete sign in with Google. Please try again.";
           setError(errorMessage);
           showToast("error", "Sign In Failed", errorMessage);
+
+          // Redirect to signin after a delay
+          setTimeout(() => {
+            router.push("/signin");
+          }, 3000);
         }
       } else {
         const errorMessage = 'Invalid authorization code. Please try signing in again.';
         setError(errorMessage);
         showToast('error', 'Authentication Error', errorMessage);
+
+        // Redirect to signin after a delay
+        setTimeout(() => {
+          router.push("/signin");
+        }, 3000);
       }
     };
 

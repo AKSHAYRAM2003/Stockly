@@ -120,6 +120,13 @@ export default function ImageGallery({ images, onImageClick }: ImageGalleryProps
                 alt={`Gallery Image ${index + 1}`}
                 loading="lazy"
                 className="w-full h-auto object-cover transition-all duration-500 group-hover:scale-105 group-hover:brightness-110"
+                onError={(e) => {
+                  // Fallback to a placeholder if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('picsum.photos')) {
+                    target.src = `https://picsum.photos/512x512?random=${index}`;
+                  }
+                }}
               />
               {/* Selection Overlay */}
               {isSelected(index) && (

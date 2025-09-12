@@ -8,29 +8,38 @@ import { Search, Send, Command, Menu, X, SparklesIcon, ChevronDown, Settings, Lo
 interface NavbarProps {
   onCategoryChange?: (category: string) => void;
   onSearch?: (query: string) => void;
+  onGenerate?: (query: string) => void;
   activeCategory?: string;
 }
 
-export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'Photos' }: NavbarProps) {
+export default function Navbar({ onCategoryChange, onSearch, onGenerate, activeCategory = 'Photos' }: NavbarProps) {
   const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchMode, setSearchMode] = useState<'search' | 'generate'>('search');
+  const [searchMode, setSearchMode] = useState<'search' | 'generate'>('generate');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
+    console.log('Navbar: Checking for access token:', !!token);
+
     if (token) {
       const fetchUser = async () => {
         try {
           const userData = await authService.getCurrentUser();
+          console.log('Navbar: User data fetched:', userData);
           setUser(userData);
         } catch (error) {
-          console.error('Failed to fetch user:', error);
+          console.error('Navbar: Failed to fetch user:', error);
+          // Clear invalid token
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
         }
       };
       fetchUser();
+    } else {
+      console.log('Navbar: No access token found');
     }
   }, []);
 
@@ -151,8 +160,26 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSearch && searchQuery.trim() && searchMode === 'generate') {
-      onSearch(searchQuery);
+    if (searchQuery.trim()) {
+      if (searchMode === 'generate') {
+        if (user?.user_id) {
+          // Check if onGenerate is available (user is on their own profile page)
+          if (onGenerate) {
+            // In-page generation - no redirect, just generate
+            onGenerate(searchQuery);
+            setSearchQuery(''); // Clear the search
+          } else {
+            // Redirect to profile page for generation
+            router.push(`/profile/${user.user_id}?generating=true&prompt=${encodeURIComponent(searchQuery)}&tab=creations`);
+            setSearchQuery(''); // Clear the search
+          }
+        } else {
+          // User not logged in, redirect to signin
+          router.push('/signin');
+        }
+      } else if (searchMode === 'search' && onSearch) {
+        onSearch(searchQuery);
+      }
     }
   };
 
@@ -307,7 +334,7 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                   }`}
                 >
                   <SparklesIcon className={`h-3 w-3 transition-all duration-300 ${
-                  searchMode === 'generate' ? 'fill-yellow-700' : 'rotate-0 scale-100'
+                  searchMode === 'generate' ? 'scale-110' : 'rotate-0 scale-100'
                   }`} />
                 </button>
                 </div>
@@ -337,7 +364,7 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                 <button
                   type="submit"
                   disabled={!searchQuery.trim()}
-                  className="p-2 bg-white text-black rounded-full hover:bg-gray-100 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 animate-in fade-in slide-in-from-right-2 shadow-md"
+                  className="p-2 bg-white text-black rounded-full hover:bg-gray-200 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 animate-in fade-in slide-in-from-right-2 shadow-md"
                 >
                   <Send className="h-3 w-3" />
                 </button>
@@ -354,23 +381,23 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                 <div className="relative profile-dropdown">
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center space-x-3 text-lg font-semibold text-white hover:text-gray-300 transition-colors"
+                    className="flex items-center space-x-3 text-white hover:text-gray-300 transition-all duration-300 group"
                   >
                     {user.avatar_url ? (
                       <img
                         src={user.avatar_url}
                         alt={user.name}
-                        className="w-12 h-12 rounded-full"
+                        className="w-10 h-10 rounded-full border-2 border-gray-600 group-hover:border-gray-500 transition-colors duration-300"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-lg font-medium">
+                      <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center border-2 border-gray-600 group-hover:border-gray-500 transition-colors duration-300">
+                        <span className="text-white text-sm font-medium">
                           {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     )}
-                    <span className="text-lg font-semibold">Profile</span>
-                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                    <span className="text-base font-medium">Profile</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   
                   {/* Dropdown Menu */}
@@ -393,7 +420,7 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                       <div className="border-t border-gray-700 my-2"></div>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-red-950  transition-colors flex items-center space-x-3"
+                        className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-gray-800  transition-colors flex items-center space-x-3"
                       >
                         <span><LogOut/></span>
                         <span>Logout</span>
@@ -481,7 +508,7 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                         }`}
                       >
                         <SparklesIcon className={`h-3.5 w-3.5 transition-all duration-300 ${
-                          searchMode === 'generate' ? 'fill-yellow-400 rotate-12 scale-110' : 'rotate-0 scale-100'
+                          searchMode === 'generate' ? 'rotate-12 scale-110' : 'rotate-0 scale-100'
                         }`} />
                       </button>
                     </div>
@@ -506,7 +533,7 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                       <button
                         type="submit"
                         disabled={!searchQuery.trim()}
-                        className="p-2 bg-white text-black rounded-full hover:bg-gray-100 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-md"
+                        className="p-2 bg-white text-black rounded-full hover:bg-gray-200 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-md"
                       >
                         <Send className="h-3.5 w-3.5" />
                       </button>
@@ -523,23 +550,23 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                   <div className="relative profile-dropdown">
                     <button
                       onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                      className="flex items-center space-x-3 text-lg font-semibold text-white hover:text-gray-300 transition-colors"
+                      className="flex items-center space-x-3 text-white hover:text-gray-300 transition-all duration-300 group"
                     >
                       {user.avatar_url ? (
                         <img
                           src={user.avatar_url}
                           alt={user.name}
-                          className="w-12 h-12 rounded-full"
+                          className="w-10 h-10 rounded-full border-2 border-gray-600 group-hover:border-gray-500 transition-colors duration-300"
                         />
                       ) : (
-                        <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
-                          <span className="text-white text-lg font-medium">
+                        <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center border-2 border-gray-600 group-hover:border-gray-500 transition-colors duration-300">
+                          <span className="text-white text-sm font-medium">
                             {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
                           </span>
                         </div>
                       )}
-                      <span className="text-lg font-semibold">Profile</span>
-                      <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                      <span className="text-base font-medium">Profile</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                     
                     {/* Dropdown Menu */}
@@ -547,24 +574,24 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                       <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
                         <button
                           onClick={handleViewProfile}
-                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                          className="w-full text-left px-4 py-3 text-base text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
                         >
-                          <span><User2Icon/></span>
+                          <User2Icon className="w-4 h-4" />
                           <span>View profile</span>
                         </button>
                         <button
                           onClick={handleAccountSettings}
-                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                          className="w-full text-left px-4 py-3 text-base text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
                         >
-                          <span><Settings/></span>
+                          <Settings className="w-4 h-4" />
                           <span>Account settings</span>
                         </button>
                         <div className="border-t border-gray-700 my-2"></div>
                         <button
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                          className="w-full text-left px-4 py-3 text-base text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
                         >
-                          <span><LogOut/></span>
+                          <LogOut className="w-4 h-4" />
                           <span>Logout</span>
                         </button>
                       </div>
@@ -575,15 +602,15 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={handleSignup}
-                    className="text-white text-sm font-medium hover:text-gray-300 transition-colors"
+                    className="text-white text-base font-medium hover:text-gray-300 transition-colors"
                   >
                     Sign up
                   </button>
                   <button
                     onClick={handleLogin}
-                    className="text-white text-sm font-medium hover:text-gray-300 transition-colors"
+                    className="text-white text-base font-medium hover:text-gray-300 transition-colors"
                   >
-                    Log in
+                    Login
                   </button>
                 </div>
               )}
@@ -613,28 +640,28 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
 
         {/* Mobile Layout */}
         <div className="md:hidden">
-          {/* Top Row - Logo, Search Bar, and Hamburger */}
-          <div className="flex items-center justify-between space-x-4">
+          {/* Top Row - Logo, Search Bar, and Auth */}
+          <div className="flex items-center justify-between space-x-3">
             {/* Logo */}
             <div className="flex items-center space-x-2 flex-shrink-0">
               <img
                 src="/logo.png"
                 alt="Stockly Logo"
-                className="w-7 h-7 filter brightness-0 invert"
+                className="w-6 h-6 filter brightness-0 invert"
               />
-              <span className="text-white font-bold text-lg italic hidden xs:block">Stockly</span>
+              <span className="text-white font-bold text-base italic hidden xs:block">Stockly</span>
             </div>
 
             {/* Search Bar - Flexible width */}
-            <div className="flex-1 max-w-sm">
+            <div className="flex-1 max-w-xs mx-2">
               <form onSubmit={handleSearch} className="relative">
-                <div className="relative flex items-center  rounded-full border border-gray-700 focus-within:border-gray-600 focus-within:ring-1 focus-within:ring-gray-600/20 transition-all duration-300 h-11 shadow-sm">
+                <div className="relative flex items-center rounded-full border border-gray-700 focus-within:border-gray-600 focus-within:ring-1 focus-within:ring-gray-600/20 transition-all duration-300 h-10 shadow-sm">
                   <div className="absolute left-1 z-20 bg-gradient-to-br from-neutral-700 to-neutral-800 rounded-full p-0.5 shadow-inner overflow-hidden">
                     <div className="relative flex">
-                      {/* Sliding background indicator - perfectly sized and positioned */}
+                      {/* Sliding background indicator */}
                       <div 
-                        className={`absolute top-0 w-7 h-7 bg-white rounded-full shadow-sm transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-                          searchMode === 'search' ? 'left-0' : 'left-7'
+                        className={`absolute top-0 w-6 h-6 bg-white rounded-full shadow-sm transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+                          searchMode === 'search' ? 'left-0' : 'left-6'
                         }`}
                       />
                       
@@ -645,13 +672,13 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                           setSearchQuery('');
                           focusSearchInput();
                         }}
-                        className={`relative z-10 w-7 h-7 flex items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+                        className={`relative z-10 w-6 h-6 flex items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
                           searchMode === 'search' 
                             ? 'text-black scale-105' 
                             : 'text-gray-400 hover:text-white scale-100'
                         }`}
                       >
-                        <Search className={`h-3 w-3 transition-all duration-300 ${
+                        <Search className={`h-2.5 w-2.5 transition-all duration-300 ${
                           searchMode === 'search' ? 'scale-110' : 'scale-100'
                         }`} />
                       </button>
@@ -663,14 +690,14 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                           setSearchQuery('');
                           focusSearchInput();
                         }}
-                        className={`relative z-10 w-7 h-7 flex items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+                        className={`relative z-10 w-6 h-6 flex items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
                           searchMode === 'generate' 
                             ? 'text-black scale-105' 
                             : 'text-gray-400 hover:text-white scale-100'
                         }`}
                       >
-                        <SparklesIcon className={`h-3 w-3 transition-all duration-300 ${
-                          searchMode === 'generate' ? 'fill-yellow-400 rotate-12 scale-110' : 'rotate-0 scale-100'
+                        <SparklesIcon className={`h-2.5 w-2.5 transition-all duration-300 ${
+                          searchMode === 'generate' ? 'rotate-12 scale-110' : 'rotate-0 scale-100'
                         }`} />
                       </button>
                     </div>
@@ -681,17 +708,17 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
                     placeholder={getPlaceholder()}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent text-white placeholder-gray-400 pl-18 pr-14 py-2.5 text-sm focus:outline-none rounded-full leading-none"
+                    className="w-full bg-transparent text-white placeholder-gray-400 pl-14 pr-12 py-2 text-sm focus:outline-none rounded-full leading-none"
                   />
 
-                  <div className="absolute right-2.5 flex items-center">
+                  <div className="absolute right-2 flex items-center">
                     {searchMode === 'generate' && (
                       <button
                         type="submit"
                         disabled={!searchQuery.trim()}
-                        className="p-1.5 bg-white text-black rounded-full hover:bg-gray-100 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-sm"
+                        className="p-1.5 bg-white text-black rounded-full hover:bg-gray-200 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300 shadow-sm"
                       >
-                        <Send className="h-3 w-3" />
+                        <Send className="h-2.5 w-2.5" />
                       </button>
                     )}
                   </div>
@@ -699,26 +726,75 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
               </form>
             </div>
 
-            {/* Hamburger Menu */}
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-white p-2 hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
+            {/* Auth Section - Login or Avatar only */}
+            <div className="flex items-center flex-shrink-0">
+              {user ? (
+                <div className="relative profile-dropdown">
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center text-white hover:text-gray-300 transition-colors"
+                  >
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name}
+                        className="w-8 h-8 rounded-full border border-gray-600"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center border border-gray-500">
+                        <span className="text-white text-xs font-medium">
+                          {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                  
+                  {/* Mobile Dropdown Menu */}
+                  {profileDropdownOpen && (
+                    <div className="absolute right-0 mt-3 w-48 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+                      <button
+                        onClick={handleViewProfile}
+                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
+                      >
+                        <User2Icon className="w-4 h-4" />
+                        <span>View profile</span>
+                      </button>
+                      <button
+                        onClick={handleAccountSettings}
+                        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-neutral-800 transition-colors flex items-center space-x-3"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>Account settings</span>
+                      </button>
+                      <div className="border-t border-gray-700 my-2"></div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-3 text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
-                <Menu className="w-5 h-5" />
+                <button
+                  onClick={handleLogin}
+                  className="text-white text-sm font-medium hover:text-gray-300 transition-colors px-3 py-1.5 border border-gray-600 rounded-full hover:border-gray-500"
+                >
+                  Login
+                </button>
               )}
-            </button>
+            </div>
           </div>
 
           {/* Second Row - Categories */}
-          <div className="mt-4 flex space-x-6 justify-start">
+          <div className="mt-3 flex space-x-4 justify-start overflow-x-auto">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => handleCategoryClick(category)}
-                className={`relative text-sm font-medium transition-all duration-300 ${
+                className={`relative text-sm font-medium transition-all duration-300 whitespace-nowrap px-2 py-1 ${
                   activeCategory === category 
                     ? 'text-white' 
                     : 'text-gray-400 hover:text-gray-300'
@@ -726,92 +802,11 @@ export default function Navbar({ onCategoryChange, onSearch, activeCategory = 'P
               >
                 {category}
                 {activeCategory === category && (
-                  <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-white rounded-full transition-all duration-300" />
+                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-white rounded-full transition-all duration-300" />
                 )}
               </button>
             ))}
           </div>
-
-          {/* Mobile Auth Section - Collapsible */}
-          {mobileMenuOpen && (
-            <div className="mt-4 pt-4 border-t border-gray-800 animate-in slide-in-from-top-2 duration-200">
-              {user ? (
-                <div className="flex items-center justify-between">
-                  <div className="relative profile-dropdown">
-                    <button
-                      onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                      className="flex items-center space-x-3 text-lg font-semibold text-white hover:text-gray-300 transition-colors"
-                    >
-                      {user.avatar_url ? (
-                        <img
-                          src={user.avatar_url}
-                          alt={user.name}
-                          className="w-12 h-12 rounded-full"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
-                          <span className="text-white text-lg font-medium">
-                            {user.first_name.charAt(0).toUpperCase()}{user.last_name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-                      <span className="text-lg font-semibold">Profile</span>
-                      <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                    
-                    {/* Dropdown Menu */}
-                    {profileDropdownOpen && (
-                      <div className="absolute right-0 mt-3 w-56 bg-black border border-gray-700 rounded-lg shadow-xl py-2 z-50 animate-in fade-in-0 zoom-in-95 duration-200">
-                        <button
-                          onClick={handleViewProfile}
-                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
-                        >
-                          <span>👤</span>
-                          <span>View profile</span>
-                        </button>
-                        <button
-                          onClick={handleAccountSettings}
-                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
-                        >
-                          <span>⚙️</span>
-                          <span>Account settings</span>
-                        </button>
-                        <div className="border-t border-gray-700 my-2"></div>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-3 text-base md:text-lg lg:text-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors flex items-center space-x-3"
-                        >
-                          <span>🚪</span>
-                          <span>Logout</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center space-x-4">
-                  <button
-                    onClick={() => {
-                      handleSignup();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-white text-sm font-medium hover:text-gray-300 transition-colors"
-                  >
-                    Sign up
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleLogin();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-white text-sm font-medium hover:text-gray-300 transition-colors"
-                  >
-                    Log in
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </nav>

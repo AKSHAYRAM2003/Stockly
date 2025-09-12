@@ -25,17 +25,34 @@ security = HTTPBearer()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3000/auth/callback")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3001/auth/callback")
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
     token = credentials.credentials
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token is required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     user_id = verify_access_token(token)  # Use access token for user verification
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    # Verify user still exists
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     return user_id
 
 @router.get("/google/url")
@@ -65,58 +82,90 @@ async def google_oauth_callback(request: OAuthCallbackRequest, db: Session = Dep
             "grant_type": "authorization_code",
             "redirect_uri": GOOGLE_REDIRECT_URI
         }
-        
+
         token_response = requests.post(token_url, data=data)
         token_response.raise_for_status()
         token_data = token_response.json()
-        
+
         # Get user info from Google
         user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
         headers = {"Authorization": f"Bearer {token_data['access_token']}"}
-        
+
         user_response = requests.get(user_info_url, headers=headers)
         user_response.raise_for_status()
         user_data = user_response.json()
-        
-        # Check if user exists, create if not
+
+        # Check if user exists by google_id
         user = db.query(User).filter(User.google_id == user_data["id"]).first()
+        print(f"OAuth callback: User lookup by google_id {user_data['id']}: {'found' if user else 'not found'}")
+
         if not user:
-            # Parse name into first and last name
-            full_name = user_data["name"]
-            name_parts = full_name.split(" ", 1)
-            first_name = name_parts[0]
-            last_name = name_parts[1] if len(name_parts) > 1 else ""
-            
-            user = User(
-                id=user_data["id"],
-                user_id=generate_user_id(first_name, last_name),
-                google_id=user_data["id"],
-                email=user_data["email"],
-                first_name=first_name,
-                last_name=last_name,
-                name=full_name,
-                avatar_url=user_data.get("picture")
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-        
+            # Check if user exists by email (for account linking)
+            existing_user = db.query(User).filter(User.email == user_data["email"]).first()
+            if existing_user:
+                print(f"OAuth callback: Linking Google account to existing user {existing_user.email}")
+                # Link Google account to existing user
+                existing_user.google_id = user_data["id"]
+                existing_user.avatar_url = user_data.get("picture", existing_user.avatar_url)
+                user = existing_user
+            else:
+                print(f"OAuth callback: Creating new user for {user_data['email']}")
+                # Parse name into first and last name
+                full_name = user_data["name"]
+                name_parts = full_name.split(" ", 1)
+                first_name = name_parts[0]
+                last_name = name_parts[1] if len(name_parts) > 1 else ""
+
+                # Generate unique user_id
+                base_user_id = generate_user_id(first_name, last_name)
+                user_id = base_user_id
+                counter = 1
+                while db.query(User).filter(User.user_id == user_id).first():
+                    user_id = f"{base_user_id}{counter}"
+                    counter += 1
+
+                user = User(
+                    id=str(uuid.uuid4()),  # Use UUID for primary key
+                    user_id=user_id,
+                    google_id=user_data["id"],
+                    email=user_data["email"],
+                    first_name=first_name,
+                    last_name=last_name,
+                    name=full_name,
+                    avatar_url=user_data.get("picture")
+                )
+                db.add(user)
+        else:
+            print(f"OAuth callback: Updating existing user {user.email}")
+            # Update user information from Google
+            user.avatar_url = user_data.get("picture", user.avatar_url)
+            user.name = user_data["name"]
+            name_parts = user_data["name"].split(" ", 1)
+            user.first_name = name_parts[0]
+            user.last_name = name_parts[1] if len(name_parts) > 1 else ""
+
+        db.commit()
+        db.refresh(user)
+        print(f"OAuth callback: User {user.email} authenticated successfully with user_id {user.user_id}")
+
         # Create tokens
         access_token = create_access_token(data={"sub": user.id})
         refresh_token = create_refresh_token(data={"sub": user.id})
-        
+
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer"
         }
-        
+
     except requests.RequestException as e:
+        print(f"OAuth request error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"OAuth authentication failed: {str(e)}"
         )
     except Exception as e:
+        print(f"OAuth callback error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Authentication error: {str(e)}"
@@ -125,13 +174,19 @@ async def google_oauth_callback(request: OAuthCallbackRequest, db: Session = Dep
 @router.post("/refresh", response_model=Dict[str, str])
 async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)):
     """Refresh access token using refresh token"""
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Refresh token is required"
+        )
+
     user_id = verify_refresh_token(refresh_token)
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token"
         )
-    
+
     # Verify user still exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -139,11 +194,11 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found"
         )
-    
-    # Create new access token
+
+    # Create new tokens
     access_token = create_access_token(data={"sub": user_id})
     new_refresh_token = create_refresh_token(data={"sub": user_id})
-    
+
     return {
         "access_token": access_token,
         "refresh_token": new_refresh_token,
@@ -151,7 +206,10 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
     }
 
 @router.get("/me", response_model=UserSchema)
-async def get_current_user_profile(current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_current_user_profile(
+    current_user_id: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Get current user profile"""
     user = db.query(User).filter(User.id == current_user_id).first()
     if not user:

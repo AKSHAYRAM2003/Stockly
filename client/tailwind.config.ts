@@ -13,6 +13,9 @@ const config: Config = {
         'xs': '475px',
       },
       colors: {
+        gray: {
+          850: '#1f2937', // Custom gray-850 between 800 and 900
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

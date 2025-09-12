@@ -110,19 +110,31 @@ export default function Dashboard() {
     ]);
   };
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+  const handleGenerate = async (prompt: string) => {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
 
     setLoading(true);
     try {
-      const response = await api.post('/api/images/generate', {
-        prompt,
-        category: category || undefined,
+      const formData = new FormData();
+      formData.append('prompt', prompt);
+      // formData.append('force', 'true');  // Remove force for proper caching
+      if (category) {
+        formData.append('category', category);
+      }
+
+      const response = await api.post('/api/images/generate', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
       const newImage = response.data;
       setImages([newImage, ...images]);
-      setPrompt('');
       showToast('success', 'Image Generated!', 'Your AI-generated image has been created successfully.');
+      // Navigate to profile after generation
+      router.push(`/profile/${user.user_id}?generating=true`);
     } catch (error) {
       console.error('Failed to generate image:', error);
       showToast('error', 'Generation Failed', 'We couldn\'t generate your image. Please check your prompt and try again.');
@@ -161,8 +173,8 @@ export default function Dashboard() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-black text-white">
-        <Navbar onCategoryChange={handleCategoryChange} onSearch={handleSearch} activeCategory={category} />
-        <PhotoHero onSearch={handleSearch} />
+        <Navbar onCategoryChange={handleCategoryChange} onSearch={handleSearch} onGenerate={handleGenerate} activeCategory={category} />
+        <PhotoHero onSearch={handleSearch} onGenerate={handleGenerate} />
         <Toolbar/>
 
         {/* Image Showcase Grid */}

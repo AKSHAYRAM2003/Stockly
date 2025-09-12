@@ -23,6 +23,10 @@ def get_db():
 # Only create tables if not using SQLite (for development)
 if not DATABASE_URL.startswith("sqlite"):
     try:
+        # Import all models here to ensure they are registered with SQLAlchemy
+        from app.models.user import User
+        from app.models.generated_image import GeneratedImage
+        
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully")
     except Exception as e:

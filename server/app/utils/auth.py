@@ -34,15 +34,29 @@ def create_refresh_token(data: dict):
 
 def verify_token(token: str, token_type: str = "access"):
     try:
+        if not token:
+            return None
+
         secret = SECRET_KEY if token_type == "access" else REFRESH_SECRET_KEY
         payload = jwt.decode(token, secret, algorithms=[ALGORITHM])
+
         user_id: str = payload.get("sub")
         token_type_in_payload: str = payload.get("type")
-        
+
         if user_id is None or token_type_in_payload != token_type:
             return None
+
+        # Check if token is expired
+        exp = payload.get("exp")
+        if exp and datetime.utcnow().timestamp() > exp:
+            return None
+
         return user_id
-    except JWTError:
+    except JWTError as e:
+        print(f"JWT verification error for {token_type} token: {str(e)}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error in token verification: {str(e)}")
         return None
 
 def verify_access_token(token: str):
